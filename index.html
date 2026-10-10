@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoValuer Terminal | Know what a stock is really worth</title>
+<meta name="description" content="Free equity valuation tool: DCF, reverse DCF, scenarios, Monte Carlo risk analysis, peer comparison and Excel export.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070f1f;--card:rgba(15,28,53,.72);--line:rgba(148,163,184,.16);--tx:#e2e8f0;--mut:#94a3b8;--a:#38bdf8;--b:#818cf8;--g:#34d399;--r:#f87171;--y:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(1100px 560px at 50% -8%,#153a6b,transparent 62%),var(--bg);color:var(--tx);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(14px);background:rgba(7,15,31,.7);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:1.1rem}
+.logo span{background:linear-gradient(90deg,var(--a),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+.links{display:flex;gap:26px;align-items:center;font-size:.92rem;color:var(--mut);font-weight:500}
+.links a:hover{color:#fff}
+.btn{display:inline-block;padding:13px 26px;border-radius:14px;font-weight:700;font-size:1rem;transition:.25s;cursor:pointer;border:0}
+.btn.p{color:#fff;background:linear-gradient(90deg,#0ea5e9,#6366f1);box-shadow:0 8px 24px rgba(99,102,241,.35)}
+.btn.p:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(99,102,241,.5)}
+.btn.g{border:1px solid var(--line);color:var(--tx);background:rgba(15,28,53,.5)}
+.btn.g:hover{border-color:var(--a)}
+.btn.s{padding:9px 18px;font-size:.88rem;border-radius:10px}
+.hero{padding:76px 0 56px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.badge{display:inline-block;font-size:.8rem;font-weight:600;color:var(--g);background:rgba(52,211,153,.12);padding:6px 14px;border-radius:999px;margin-bottom:20px}
+h1{font-size:3.2rem;line-height:1.1;letter-spacing:-.035em;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--a),var(--b),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:1.1rem;margin:20px 0 30px;max-width:540px}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.note{color:#64748b;font-size:.82rem;margin-top:14px}
+.mock{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px rgba(56,189,248,.06);transform:perspective(1200px) rotateY(-6deg) rotateX(2deg);transition:.5s}
+.mock:hover{transform:none}
+.dots{display:flex;gap:6px;margin-bottom:14px}.dots i{width:10px;height:10px;border-radius:50%;background:#334155}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.k{background:rgba(7,15,31,.6);border:1px solid var(--line);border-radius:12px;padding:12px}
+.k small{display:block;color:var(--mut);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.k b{font-size:1.25rem;font-weight:800}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700}
+.dn{background:rgba(248,113,113,.15);color:var(--r)}.up{background:rgba(52,211,153,.15);color:var(--g)}.am{background:rgba(251,191,36,.15);color:var(--y)}
+.tabs{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}.tabs span{font-size:.64rem;padding:5px 10px;border-radius:8px;color:var(--mut);background:rgba(7,15,31,.6)}
+.tabs span:first-child{background:linear-gradient(90deg,#0ea5e9,#6366f1);color:#fff}
+.bars{display:flex;align-items:flex-end;gap:8px;height:110px;padding-top:8px}
+.bars div{flex:1;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--a),#0369a1);transform-origin:bottom;animation:grow 1.2s ease both}
+.bars div.t{background:linear-gradient(180deg,var(--g),#047857)}.bars div.d{background:linear-gradient(180deg,var(--r),#991b1b)}
+@keyframes grow{from{transform:scaleY(0)}}
+section{padding:68px 0}
+.eyebrow{color:var(--a);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+h2{font-size:2.2rem;letter-spacing:-.03em;line-height:1.2;margin:8px 0 14px}
+.lead{color:var(--mut);max-width:680px;font-size:1.05rem}
+.stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 24px}
+.stat b{font-size:1.8rem;display:block;font-weight:800;background:linear-gradient(90deg,var(--a),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--mut);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;transition:.3s}
+.card:hover{transform:translateY(-4px);border-color:var(--a);box-shadow:0 14px 34px rgba(56,189,248,.14)}
+.card h3{font-size:1.02rem;margin-bottom:6px}.card p{color:var(--mut);font-size:.92rem}
+.ic{font-size:1.5rem;margin-bottom:10px}
+.step b{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(90deg,#0ea5e9,#6366f1);margin-bottom:12px;font-weight:800}
+.panel{background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(99,102,241,.08));border:1px solid var(--line);border-radius:22px;padding:34px;margin-top:28px}
+.panel ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px 32px}
+.panel li{color:var(--mut);font-size:.95rem;padding-left:26px;position:relative}
+.panel li::before{content:"✓";position:absolute;left:0;color:var(--g);font-weight:800}
+.panel li strong{color:var(--tx)}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-top:12px}
+summary{cursor:pointer;font-weight:600}details p{color:var(--mut);margin-top:10px;font-size:.95rem}
+.final{text-align:center;padding:76px 0}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;color:#64748b;font-size:.82rem;text-align:center}
+footer a{color:var(--mut);margin:0 10px}footer a:hover{color:#fff}
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.js .rv.in{opacity:1;transform:none}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:44px}h1{font-size:2.3rem}h2{font-size:1.7rem}.links a:not(.btn){display:none}.mock{transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#top">📈 <span>AutoValuer</span> Terminal</a>
+  <div class="links"><a href="#what">What it is</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#start">Before you start</a><a href="#faq">FAQ</a>
+  <a class="btn p s" href="https://autovaluer-live.onrender.com/?start=1">Launch</a></div>
+</div></nav>
+
+<main id="top">
+<div class="wrap hero">
+  <div>
+    <span class="badge">● Free · No sign-up · Live market data</span>
+    <h1>Know what a stock is really worth, <em>and how sure you can be.</em></h1>
+    <p class="sub">AutoValuer Terminal turns a company's cash flows into a fair-value estimate, compares it with the market price, and stress-tests the answer, so you can see what the market is assuming before you form a view.</p>
+    <div class="cta"><a class="btn p" href="https://autovaluer-live.onrender.com/?start=1">🚀 Launch the Terminal</a><a class="btn g" href="#how">See how it works</a></div>
+    <p class="note">The first launch can take up to a minute while the free server wakes up. We start waking it as soon as you open this page.</p>
+  </div>
+  <div class="mock" aria-hidden="true">
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div class="kp">
+      <div class="k"><small>Intrinsic value</small><b>$160.56</b></div>
+      <div class="k"><small>Market price</small><b>$336.67</b></div>
+      <div class="k"><small>Verdict</small><span class="pill dn">▼ OVERVALUED 52%</span></div>
+    </div>
+    <div class="tabs"><span>Valuation</span><span>Scenarios</span><span>Reverse DCF</span><span>Risk</span><span>Football Field</span><span>Peers</span></div>
+    <div class="bars"><div style="height:30%"></div><div style="height:72%"></div><div class="t" style="height:100%"></div><div style="height:22%"></div><div class="d" style="height:16%"></div><div class="t" style="height:96%"></div></div>
+    <p style="color:#64748b;font-size:.7rem;margin-top:8px">Illustrative example: Apple with the app's preset inputs.</p>
+  </div>
+</div>
+
+<section id="what"><div class="wrap rv">
+  <span class="eyebrow">What it is</span>
+  <h2>A valuation lab, in plain language</h2>
+  <p class="lead">A company is worth the cash it will produce in the future, adjusted for the fact that money tomorrow is worth less than money today. That idea is called a <strong>discounted cash flow (DCF)</strong>. AutoValuer does the maths for you, then asks the harder questions: what if growth is lower, what is the market already assuming, and how does the answer compare with similar companies?</p>
+  <div class="stats">
+    <div class="stat"><b>8</b><span>analysis tabs</span></div>
+    <div class="stat"><b>10,000</b><span>simulated scenarios</span></div>
+    <div class="stat"><b>3</b><span>discount-rate methods</span></div>
+    <div class="stat"><b>US + India</b><span>stocks supported</span></div>
+  </div>
+  <p class="note" style="margin-top:18px">Built by an economics student as a learning project. It is a tool for exploring ideas, not for making investment decisions.</p>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <span class="eyebrow rv">How it works</span><h2 class="rv">From a ticker to a verdict in four steps</h2>
+  <div class="grid">
+    <div class="card step rv"><b>1</b><h3>Pick a company</h3><p>Choose a preset or type any Yahoo Finance ticker, such as AAPL or RELIANCE.NS. Live data loads automatically.</p></div>
+    <div class="card step rv"><b>2</b><h3>Set your assumptions</h3><p>Growth, discount rate and terminal growth, with sliders. You can also start from the company's historical growth.</p></div>
+    <div class="card step rv"><b>3</b><h3>Read the verdict</h3><p>See the fair value per share, the gap to today's price, and whether the stock looks undervalued or overvalued.</p></div>
+    <div class="card step rv"><b>4</b><h3>Stress-test it</h3><p>Check bear and bull cases, the growth the market implies, a Monte Carlo simulation and peer comparisons.</p></div>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <span class="eyebrow rv">Features</span><h2 class="rv">Everything inside the terminal</h2>
+  <div class="grid">
+    <div class="card rv"><div class="ic">📋</div><h3>Valuation</h3><p>A waterfall from future cash flows to equity value, plus a projection of nominal vs. discounted cash flow.</p></div>
+    <div class="card rv"><div class="ic">🎯</div><h3>Scenarios</h3><p>Bear, base and bull cases with editable probabilities and a probability-weighted value.</p></div>
+    <div class="card rv"><div class="ic">🔄</div><h3>Reverse DCF</h3><p>Works backwards from the price to show the growth rate the market is assuming.</p></div>
+    <div class="card rv"><div class="ic">🌋</div><h3>Risk analysis</h3><p>An interactive 3D surface and 10,000 Monte Carlo scenarios show how fragile the answer is.</p></div>
+    <div class="card rv"><div class="ic">📊</div><h3>Football field</h3><p>One chart comparing every valuation range against today's price.</p></div>
+    <div class="card rv"><div class="ic">🏢</div><h3>Peer comparison</h3><p>P/E and EV/EBITDA against similar companies, with the value they imply.</p></div>
+    <div class="card rv"><div class="ic">📝</div><h3>Summary &amp; Excel export</h3><p>A written summary of the results and a downloadable Excel report.</p></div>
+    <div class="card rv"><div class="ic">📚</div><h3>Methodology</h3><p>Every formula, assumption and limitation explained in plain language.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap rv">
+  <span class="eyebrow">Key terms in 30 seconds</span><h2>The words you will see</h2>
+  <div class="grid">
+    <div class="card"><h3>DCF</h3><p>Valuing a company by adding up its future cash flows, discounted to today's money.</p></div>
+    <div class="card"><h3>WACC / discount rate</h3><p>The return investors demand. A higher rate means a lower value today.</p></div>
+    <div class="card"><h3>Terminal growth</h3><p>The steady growth assumed forever after the first 5 years.</p></div>
+    <div class="card"><h3>Intrinsic value</h3><p>The model's estimate of what one share is worth, based on your assumptions.</p></div>
+    <div class="card"><h3>Reverse DCF</h3><p>Asks what growth the current price needs, instead of what the stock is worth.</p></div>
+    <div class="card"><h3>Monte Carlo</h3><p>Thousands of random what-if runs that show a range of outcomes, not one number.</p></div>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap rv">
+  <span class="eyebrow">Before you start</span><h2>Six things worth knowing</h2>
+  <div class="panel"><ul>
+    <li><strong>It is an estimate, not advice.</strong> Results depend heavily on the assumptions you choose.</li>
+    <li><strong>Look for the data badge.</strong> <span class="pill up">● LIVE DATA</span> means inputs came from Yahoo Finance. <span class="pill am">● PRESET DATA</span> means some figures are built-in defaults to check.</li>
+    <li><strong>Small changes matter.</strong> Growth, discount rate and terminal growth move the answer a lot. That is what the risk tabs show.</li>
+    <li><strong>Tickers use Yahoo Finance format.</strong> Examples: AAPL, MSFT, RELIANCE.NS, HDFCBANK.NS.</li>
+    <li><strong>Units differ by market.</strong> US stocks are in dollars and millions. Indian stocks (.NS / .BO) are in rupees and crore.</li>
+    <li><strong>The first load can be slow.</strong> The free server sleeps when unused and may need about a minute to wake.</li>
+  </ul></div>
+</div></section>
+
+<section id="faq"><div class="wrap rv">
+  <span class="eyebrow">FAQ</span><h2>Common questions</h2>
+  <details><summary>Is it free? Do I need an account?</summary><p>Yes, it is free, and there is no sign-up or login.</p></details>
+  <details><summary>Is the data real-time?</summary><p>Prices and financials come from Yahoo Finance and may be delayed or incomplete. The app tells you which inputs are live and which are presets.</p></details>
+  <details><summary>Why does it say a famous company is overvalued?</summary><p>A DCF reflects only the growth and discount-rate assumptions you set. The Reverse DCF tab shows what growth the market price is assuming, which often explains the gap.</p></details>
+  <details><summary>How do I value an Indian stock?</summary><p>Type the ticker with .NS (NSE) or .BO (BSE), for example RELIANCE.NS. Amounts switch to rupees and crore. For the most careful use, enter an Indian risk-free rate in the CAPM options.</p></details>
+  <details><summary>Can I share a valuation?</summary><p>Yes. Open the "Share this valuation" box in the terminal to copy a link that opens a specific company directly.</p></details>
+</div></section>
+
+<div class="wrap final rv">
+  <h2>Ready to value your first stock?</h2>
+  <p class="lead" style="margin:0 auto 26px">It takes about a minute to get a first verdict.</p>
+  <a class="btn p" href="https://autovaluer-live.onrender.com/?start=1">🚀 Launch the Terminal</a>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <p><a href="https://github.com/harsh-manoor-rgb/AutoValuer">Source code on GitHub</a><a href="https://www.linkedin.com/in/harsh-manoor">LinkedIn</a></p>
+  <p style="margin-top:10px">Built by Harshdeep Singh, BSc Economics (Hons), Lovely Professional University. For learning and demonstration only. Not investment advice.</p>
+</div></footer>
+
+<script>
+document.documentElement.classList.add('js');
+var io=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
+document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+/* Wake the free server in the background while the visitor reads */
+try{fetch('https://autovaluer-live.onrender.com/',{mode:'no-cors'})}catch(e){}
+</script>
+</body>
+</html>
