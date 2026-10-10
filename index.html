@@ -76,13 +76,25 @@ footer a{color:var(--mut);margin:0 10px}footer a:hover{color:#fff}
 .js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.js .rv.in{opacity:1;transform:none}
 @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:44px}h1{font-size:2.3rem}h2{font-size:1.7rem}.links a:not(.btn){display:none}.mock{transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+main,footer{transition:opacity .35s ease,transform .35s ease}
+.app-open main,.app-open footer{opacity:0;transform:translateY(-24px);pointer-events:none}
+.ao{display:none}.app-open .ao{display:inline-block}
+.app-open .links a:not(.btn),.app-open .links a[data-launch]{display:none}
+#app{position:fixed;top:65px;left:0;right:0;bottom:0;background:var(--bg);animation:appin .5s ease both}
+#app iframe{width:100%;height:100%;border:0;display:block}
+@keyframes appin{from{opacity:0;transform:translateY(30px)}}
+#loading{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:var(--bg);padding:24px}
+#loading .spin{width:44px;height:44px;border-radius:50%;border:4px solid rgba(148,163,184,.2);border-top-color:var(--a);margin:0 auto 18px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{color:var(--mut);max-width:380px}#loading a{color:var(--a);font-weight:600}
 </style>
 </head>
 <body>
 <nav><div class="wrap">
   <a class="logo" href="#top">📈 <span>AutoValuer</span> Terminal</a>
   <div class="links"><a href="#what">What it is</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#start">Before you start</a><a href="#faq">FAQ</a>
-  <a class="btn p s" href="https://autovaluer-live.onrender.com/?start=1">Launch</a></div>
+  <a class="btn p s" href="https://autovaluer-live.onrender.com/?start=1" data-launch>Launch</a><a class="btn g s ao" href="#top">← Home</a><a class="btn g s ao" href="https://autovaluer-live.onrender.com/?start=1" target="_blank" rel="noopener">Open in new tab ↗</a></div>
 </div></nav>
 
 <main id="top">
@@ -91,7 +103,7 @@ footer a{color:var(--mut);margin:0 10px}footer a:hover{color:#fff}
     <span class="badge">● Free · No sign-up · Live market data</span>
     <h1>Know what a stock is really worth, <em>and how sure you can be.</em></h1>
     <p class="sub">AutoValuer Terminal turns a company's cash flows into a fair-value estimate, compares it with the market price, and stress-tests the answer, so you can see what the market is assuming before you form a view.</p>
-    <div class="cta"><a class="btn p" href="https://autovaluer-live.onrender.com/?start=1">🚀 Launch the Terminal</a><a class="btn g" href="#how">See how it works</a></div>
+    <div class="cta"><a class="btn p" href="https://autovaluer-live.onrender.com/?start=1" data-launch>🚀 Launch the Terminal</a><a class="btn g" href="#how">See how it works</a></div>
     <p class="note">The first launch can take up to a minute while the free server wakes up. We start waking it as soon as you open this page.</p>
   </div>
   <div class="mock" aria-hidden="true">
@@ -180,7 +192,7 @@ footer a{color:var(--mut);margin:0 10px}footer a:hover{color:#fff}
 <div class="wrap final rv">
   <h2>Ready to value your first stock?</h2>
   <p class="lead" style="margin:0 auto 26px">It takes about a minute to get a first verdict.</p>
-  <a class="btn p" href="https://autovaluer-live.onrender.com/?start=1">🚀 Launch the Terminal</a>
+  <a class="btn p" href="https://autovaluer-live.onrender.com/?start=1" data-launch>🚀 Launch the Terminal</a>
 </div>
 </main>
 
@@ -189,12 +201,38 @@ footer a{color:var(--mut);margin:0 10px}footer a:hover{color:#fff}
   <p style="margin-top:10px">Built by Harshdeep Singh, BSc Economics (Hons), Lovely Professional University. For learning and demonstration only. Not investment advice.</p>
 </div></footer>
 
+
+<div id="app" hidden>
+  <div id="loading"><div><div class="spin"></div><p><strong style="color:#fff">Starting the terminal...</strong><br>The first launch can take up to a minute while the free server wakes up.</p>
+  <p id="slow" hidden style="margin-top:12px">Taking long? <a href="https://autovaluer-live.onrender.com/?start=1" target="_blank" rel="noopener">Open it in a new tab</a>.</p></div></div>
+  <iframe id="frame" title="AutoValuer Terminal" allow="fullscreen; clipboard-write"></iframe>
+</div>
 <script>
 document.documentElement.classList.add('js');
 var io=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
 document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
 /* Wake the free server in the background while the visitor reads */
 try{fetch('https://autovaluer-live.onrender.com/',{mode:'no-cors'})}catch(e){}
+
+/* Launch the terminal inside this page: the front page slides away, the app opens in its place */
+var APP='https://autovaluer-live.onrender.com/?embed=true&start=1';
+var main=document.getElementById('top'),foot=document.querySelector('footer'),app=document.getElementById('app'),frame=document.getElementById('frame'),loading=document.getElementById('loading'),isOpen=false;
+function openApp(){
+  if(isOpen)return;isOpen=true;
+  if(!frame.getAttribute('src')){frame.src=APP;setTimeout(function(){document.getElementById('slow').hidden=false},15000)}
+  document.body.classList.add('app-open');app.hidden=false;
+  setTimeout(function(){if(isOpen){main.hidden=true;foot.hidden=true;window.scrollTo(0,0)}},350);
+}
+function closeApp(){
+  if(!isOpen)return;isOpen=false;
+  main.hidden=false;foot.hidden=false;app.hidden=true;document.body.classList.remove('app-open');
+  var el=document.getElementById(location.hash.slice(1));if(el)el.scrollIntoView();
+}
+function route(){location.hash==='#terminal'?openApp():closeApp()}
+window.addEventListener('hashchange',route);
+document.querySelectorAll('[data-launch]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();location.hash='terminal'})});
+frame.addEventListener('load',function(){loading.style.display='none'});
+route();
 </script>
 </body>
 </html>
