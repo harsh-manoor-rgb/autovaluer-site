@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoValuer Lab | Instant stock valuation</title>
+<meta name="description" content="Drag the sliders and watch DCF, scenarios, reverse DCF, sensitivity and Monte Carlo update instantly.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+:root{--bg:#070f1f;--card:rgba(15,28,53,.72);--line:rgba(148,163,184,.16);--tx:#e2e8f0;--mut:#94a3b8;--a:#38bdf8;--b:#818cf8;--g:#34d399;--r:#f87171;--y:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(1100px 560px at 50% -8%,#153a6b,transparent 62%),var(--bg);color:var(--tx);line-height:1.5;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:0 24px;height:60px;backdrop-filter:blur(14px);background:rgba(7,15,31,.75);border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:-.02em}.logo span{background:linear-gradient(90deg,var(--a),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{display:inline-block;padding:9px 16px;border-radius:10px;font-weight:700;font-size:.85rem;border:1px solid var(--line);color:var(--tx);background:rgba(15,28,53,.5);cursor:pointer;transition:.2s;font-family:inherit}
+.btn:hover{border-color:var(--a)}.btn.p{border:0;color:#fff;background:linear-gradient(90deg,#0ea5e9,#6366f1)}
+.wrap{max-width:1360px;margin:0 auto;padding:28px 24px 50px}
+.intro h1{font-size:2.4rem;letter-spacing:-.03em;line-height:1.1}.intro h1 em{font-style:normal;background:linear-gradient(90deg,var(--a),var(--b),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent}
+.intro p{color:var(--mut);margin-top:8px}
+.badge{display:inline-block;font-size:.78rem;font-weight:600;color:var(--g);background:rgba(52,211,153,.12);padding:5px 12px;border-radius:999px;margin-bottom:12px}
+.app{display:grid;grid-template-columns:330px 1fr;gap:22px;margin-top:22px;align-items:start}
+.panel{position:sticky;top:78px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;backdrop-filter:blur(12px)}
+.panel h2{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--a);margin:4px 0 10px}
+label{display:block;font-size:.78rem;font-weight:600;color:var(--mut);margin-bottom:10px}
+input[type=number],select{width:100%;margin-top:4px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:rgba(7,15,31,.85);color:var(--tx);font:inherit;font-size:.92rem}
+input[type=range]{width:100%;margin-top:6px;accent-color:#38bdf8}
+label b{float:right;color:var(--tx)}
+.note{font-size:.74rem;color:#64748b;margin-top:8px}
+.pill{display:inline-block;padding:5px 13px;border-radius:999px;font-size:.82rem;font-weight:700}
+.up{background:rgba(52,211,153,.15);color:var(--g)}.dn{background:rgba(248,113,113,.15);color:var(--r)}.am{background:rgba(251,191,36,.15);color:var(--y)}
+.hero{display:grid;grid-template-columns:260px 1fr;gap:18px}
+.gauge{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 14px 18px;text-align:center}
+.gauge svg{width:100%}.gauge small{color:var(--mut);font-size:.7rem;display:flex;justify-content:space-between;padding:0 8px}
+#needle{transform-origin:100px 100px;transition:transform .9s cubic-bezier(.2,.9,.2,1)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;transition:.3s}
+.k:hover{transform:translateY(-3px);border-color:var(--a)}
+.k small{display:block;color:var(--mut);font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.k b{display:block;font-size:2rem;font-weight:800;margin:6px 0;font-variant-numeric:tabular-nums}.k span{color:#64748b;font-size:.78rem}
+.story{margin:16px 0;padding:18px 22px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(14,165,233,.09),rgba(99,102,241,.09));color:#cbd5e1}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cc{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;min-width:0}.cc.w{grid-column:1/-1}
+.cc h3{font-size:.95rem;margin-bottom:2px}.cc p{font-size:.78rem;color:var(--mut);margin-bottom:6px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.warn{padding:12px 16px;border-radius:12px;background:rgba(248,113,113,.12);color:var(--r);margin-bottom:14px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f1c35;border:1px solid var(--a);padding:10px 18px;border-radius:12px;transition:.3s;font-size:.88rem;z-index:30}
+#toast.s{transform:translateX(-50%)}
+footer{text-align:center;color:#64748b;font-size:.78rem;margin-top:30px}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.panel{position:static}.hero{grid-template-columns:1fr}.charts{grid-template-columns:1fr}}
+@media(max-width:560px){.kp{grid-template-columns:1fr}.intro h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="index.html">📈 <span>AutoValuer</span> Lab</a>
+  <div style="display:flex;gap:10px"><a class="btn" href="index.html">← Home</a><a class="btn p" href="https://autovaluer-live.onrender.com/?start=1">Live data terminal ↗</a></div>
+</header>
+<div class="wrap">
+  <div class="intro"><span class="badge">⚡ Runs in your browser · Instant · Nothing to wake up</span>
+    <h1>The <em>Valuation Lab</em></h1>
+    <p>Pick a company, drag the sliders, and watch every chart recalculate in real time.</p></div>
+  <div class="app">
+    <aside class="panel">
+      <h2>Company</h2>
+      <label>Preset<select id="co"></select></label>
+      <div id="fields"></div>
+      <p class="note">Amounts: millions for US companies, crore for Indian ones. Preset figures are illustrative defaults, not live data. Edit any of them.</p>
+      <h2 style="margin-top:16px">Assumptions</h2>
+      <div id="sliders"></div>
+      <div class="acts"><button class="btn" id="share">🔗 Copy share link</button><button class="btn" id="csv">⬇️ Export CSV</button></div>
+      <p class="note">Need live market data, peers and Excel export? Use the <a href="https://autovaluer-live.onrender.com/?start=1" style="color:var(--a)">live terminal</a>.</p>
+    </aside>
+    <section>
+      <div id="warn" class="warn" hidden>WACC must be greater than terminal growth to get a finite value.</div>
+      <div id="noplot" class="warn" hidden>Charts could not load (check your internet connection). The numbers above still work.</div>
+      <div class="hero">
+        <div class="gauge" aria-label="Valuation gauge">
+          <svg viewBox="0 0 200 118"><defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#f87171"/><stop offset=".5" stop-color="#fbbf24"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+            <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="rgba(148,163,184,.18)" stroke-width="16" stroke-linecap="round"/>
+            <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#gg)" stroke-width="16" stroke-linecap="round" opacity=".9"/>
+            <g id="needle"><line x1="100" y1="100" x2="100" y2="38" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#fff"/></g></svg>
+          <small><span>Overvalued</span><span>Fair</span><span>Undervalued</span></small>
+          <div id="verdict" style="margin-top:10px" aria-live="polite"></div>
+        </div>
+        <div class="kp">
+          <div class="k"><small>Intrinsic value</small><b id="k1">-</b><span>per share, base case</span></div>
+          <div class="k"><small>Market price</small><b id="k2">-</b><span>your input</span></div>
+          <div class="k"><small>Weighted value</small><b id="k3">-</b><span>bear 25% · base 50% · bull 25%</span></div>
+        </div>
+      </div>
+      <p class="story" id="story"></p>
+      <div class="charts">
+        <div class="cc"><h3>Enterprise-to-equity bridge</h3><p>How future cash flows become value per share.</p><div id="c1"></div></div>
+        <div class="cc"><h3>Bear / base / bull</h3><p>The scenario spread slider widens or narrows the cases.</p><div id="c2"></div></div>
+        <div class="cc"><h3>Reverse DCF</h3><p>What growth does today's price require?</p><div id="c3"></div></div>
+        <div class="cc"><h3>Sensitivity map</h3><p>Value per share across WACC and growth. Green is above the price, red below.</p><div id="c4"></div></div>
+        <div class="cc w"><h3>Monte Carlo: 10,000 scenarios</h3><p>Growth varies by ±2 points and WACC by ±1 point. Fixed seed, so results are repeatable.</p><div id="c5"></div></div>
+        <div class="cc w"><h3>Football field</h3><p>Every valuation range against the market price (dashed line).</p><div id="c6"></div></div>
+      </div>
+    </section>
+  </div>
+  <footer>AutoValuer Lab · Built by Harshdeep Singh · For learning and demonstration only. Not investment advice.</footer>
+</div>
+<div id="toast"></div>
+<script>
+/*ENGINE*/
+const dcf=(f,c,d,s,g,w,t)=>{if(w<=t||s<=0||g<=-.99)return null;let pv=0;for(let i=1;i<=5;i++)pv+=f*(1+g)**i/(1+w)**i;const tv=f*(1+g)**5*(1+t)/(w-t)/(1+w)**5,ev=pv+tv,eq=ev+c-d;return{pv,tv,ev,eq,ps:eq/s}};
+const implied=(f,c,d,s,p,w,t)=>{if(f<=0||p<=0||w<=t)return null;const h=g=>dcf(f,c,d,s,g,w,t).ps-p;let lo=-.5,hi=1.5;if(h(lo)>0||h(hi)<0)return null;for(let i=0;i<60;i++){const m=(lo+hi)/2;h(m)<0?lo=m:hi=m}return(lo+hi)/2};
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function monte(f,c,d,s,g,w,t,n=10000){const r=mulberry32(42),o=[];for(let i=0;i<n;i++){const u=r()||1e-9,v=r(),m=Math.sqrt(-2*Math.log(u)),gg=g+.02*m*Math.cos(2*Math.PI*v),ww=w+.01*m*Math.sin(2*Math.PI*v);if(ww<=t)continue;const x=dcf(f,c,d,s,gg,ww,t);if(x)o.push(x.ps)}return o.sort((a,b)=>a-b)}
+const q=(a,p)=>a[Math.min(a.length-1,Math.floor(p*a.length))];
+/*END*/
+const P=[
+{n:'Apple Inc. (AAPL)',c:'$',u:'M',price:225,fcf:95000,cash:150000,debt:110000,sh:15200,g:10,w:8.5,tg:3},
+{n:'Microsoft Corp. (MSFT)',c:'$',u:'M',price:415,fcf:75000,cash:80000,debt:60000,sh:7430,g:11,w:8.5,tg:3},
+{n:'NVIDIA Corp. (NVDA)',c:'$',u:'M',price:125,fcf:50000,cash:35000,debt:8500,sh:24600,g:20,w:10,tg:4},
+{n:'Tata Motors (TATAMOTORS.NS)',c:'₹',u:'Cr',price:980,fcf:21000,cash:42500,debt:58000,sh:367,g:12,w:10,tg:4},
+{n:'Reliance (RELIANCE.NS)',c:'₹',u:'Cr',price:2950,fcf:65000,cash:185000,debt:310000,sh:676,g:10,w:10.5,tg:4},
+{n:'HDFC Bank (HDFCBANK.NS)',c:'₹',u:'Cr',price:1600,fcf:40000,cash:150000,debt:250000,sh:760,g:11,w:11,tg:3.5},
+{n:'Custom (enter your own)',c:'$',u:'M',price:100,fcf:1000,cash:500,debt:200,sh:100,g:10,w:10,tg:3}];
+const $=id=>document.getElementById(id);
+$('fields').innerHTML=[['price','Market price'],['fcf','Base free cash flow'],['cash','Total cash'],['debt','Total debt'],['sh','Shares outstanding']].map(([k,l])=>`<label>${l}<input id="${k}" type="number" step="any"></label>`).join('');
+$('sliders').innerHTML=[['g','Growth rate (5 years)',1,40,.1],['w','WACC / discount rate',5,25,.1],['t','Terminal growth',1,10,.1],['sp','Scenario spread (growth pts)',1,8,.5]].map(([k,l,a,b,s])=>`<label>${l} <b id="o${k}"></b><input id="${k}" type="range" min="${a}" max="${b}" step="${s}"></label>`).join('');
+P.forEach((p,i)=>$('co').add(new Option(p.n,i)));
+const hasP=typeof Plotly!=='undefined';if(!hasP)$('noplot').hidden=false;
+const num=id=>+$(id).value;
+function load(i){const p=P[i];$('price').value=p.price;$('fcf').value=p.fcf;$('cash').value=p.cash;$('debt').value=p.debt;$('sh').value=p.sh;$('g').value=p.g;$('w').value=p.w;$('t').value=p.tg;$('sp').value=4}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('s');setTimeout(()=>t.classList.remove('s'),1800)}
+const shown={};
+function tween(id,val,f){const e=$(id),a=shown[id]??val,t0=performance.now();shown[id]=val;(function s(t){const k=Math.min(1,(t-t0)/500),v=a+(val-a)*(1-Math.pow(1-k,3));e.textContent=f(v);if(k<1)requestAnimationFrame(s)})(t0)}
+const L=(o={})=>Object.assign({paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{family:'Inter,sans-serif',color:'#cbd5e1',size:12},margin:{l:60,r:16,t:8,b:44},height:310,xaxis:{gridcolor:'rgba(148,163,184,.12)'},yaxis:{gridcolor:'rgba(148,163,184,.12)'}},o);
+const CF={displayModeBar:false,responsive:true};
+const hline=(y,c='#fbbf24')=>({type:'line',xref:'paper',x0:0,x1:1,y0:y,y1:y,line:{color:c,dash:'dash',width:2}});
+const vline=(x,c,xr='x')=>({type:'line',xref:xr,yref:'paper',x0:x,x1:x,y0:0,y1:1,line:{color:c,dash:'dash',width:2}});
+let raf;const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)};
+function update(){
+  const p=P[$('co').value],cur=p.c,f=num('fcf'),c=num('cash'),d=num('debt'),s=num('sh'),price=num('price'),g=num('g')/100,w=num('w')/100,t=num('t')/100,sp=num('sp')/100;
+  ['g','w','t'].forEach(k=>$('o'+k).textContent=(+$(k).value).toFixed(1)+'%');$('osp').textContent=(+$('sp').value).toFixed(1)+' pts';
+  const loc=cur==='₹'?'en-IN':'en-US',fmt=(x,n=2)=>x.toLocaleString(loc,{minimumFractionDigits:n,maximumFractionDigits:n});
+  const B=dcf(f,c,d,s,g,w,t);$('warn').hidden=!!B;if(!B)return;
+  const up=price>0?(B.ps/price-1)*100:0,isUp=up>0;
+  const sc={Bear:dcf(f,c,d,s,g-sp,w+sp/4,t),Base:B,Bull:dcf(f,c,d,s,g+sp,w-sp/4,t)},wt={Bear:.25,Base:.5,Bull:.25};
+  let tw=0,wv=0;for(const k in sc)if(sc[k]){tw+=wt[k];wv+=sc[k].ps*wt[k]}wv=tw?wv/tw:B.ps;
+  tween('k1',B.ps,v=>cur+fmt(v));tween('k2',price,v=>cur+fmt(v));tween('k3',wv,v=>cur+fmt(v));
+  $('needle').style.transform=`rotate(${Math.max(-60,Math.min(60,up))/60*80}deg)`;
+  $('verdict').innerHTML=`<span class="pill ${isUp?'up':'dn'}">${isUp?'▲ UNDERVALUED':'▼ OVERVALUED'} · ${Math.abs(up).toFixed(1)}%</span>`;
+  const mc=monte(f,c,d,s,g,w,t),pu=mc.length?mc.filter(x=>x>price).length/mc.length*100:0,ig=implied(f,c,d,s,price,w,t);
+  $('story').innerHTML=`At <b>${cur}${fmt(price)}</b> the market is pricing in about <b>${ig===null?'n/a':(ig*100).toFixed(1)+'%'}</b> annual growth for 5 years, against your <b>${(g*100).toFixed(1)}%</b>. Your base case values the stock at <b>${cur}${fmt(B.ps)}</b>, ${isUp?'above':'below'} the price by ${Math.abs(up).toFixed(1)}%. In <b>${pu.toFixed(0)}%</b> of 10,000 simulations the value comes out above today's price.`;
+  if(!hasP)return;
+  const v=[B.pv,B.tv,B.ev,c,-d,B.eq];
+  Plotly.react('c1',[{type:'waterfall',orientation:'v',measure:['relative','relative','total','relative','relative','total'],x:['5-yr cash flow PV','Terminal value PV','Enterprise value','+ Cash','- Debt','Equity value'],y:v,text:v.map(x=>fmt(x,0)),textposition:'outside',increasing:{marker:{color:'#38bdf8'}},decreasing:{marker:{color:'#f87171'}},totals:{marker:{color:'#34d399'}}}],L({yaxis:{title:p.u,gridcolor:'rgba(148,163,184,.12)'},margin:{l:70,r:10,t:24,b:44}}),CF);
+  const ks=Object.keys(sc).filter(k=>sc[k]),col={Bear:'#f87171',Base:'#38bdf8',Bull:'#34d399'};
+  Plotly.react('c2',[{type:'bar',x:ks,y:ks.map(k=>sc[k].ps),marker:{color:ks.map(k=>col[k])},text:ks.map(k=>cur+fmt(sc[k].ps)),textposition:'outside'}],L({shapes:[hline(price)],yaxis:{gridcolor:'rgba(148,163,184,.12)',title:'per share'},margin:{l:60,r:10,t:24,b:44}}),CF);
+  const gs=[],vs=[];for(let x=-5;x<=40;x+=1){const r=dcf(f,c,d,s,x/100,w,t);gs.push(x);vs.push(r?r.ps:null)}
+  const sh3=[hline(price),vline(g*100,'#34d399')];if(ig!==null)sh3.push(vline(ig*100,'#f87171'));
+  Plotly.react('c3',[{type:'scatter',mode:'lines',x:gs,y:vs,line:{color:'#38bdf8',width:3}}],L({shapes:sh3,xaxis:{title:'5-yr growth (%)  ·  green = yours, red = implied by price',gridcolor:'rgba(148,163,184,.12)'},yaxis:{title:'value per share',gridcolor:'rgba(148,163,184,.12)'}}),CF);
+  const dw=[-.03,-.02,-.01,0,.01,.02,.03],dg=[-.06,-.04,-.02,0,.02,.04,.06],all=[],z=dg.map(a=>dw.map(b=>{const r=dcf(f,c,d,s,g+a,w+b,t);if(r)all.push(r.ps);return r?r.ps:null}));
+  Plotly.react('c4',[{type:'heatmap',z:z,x:dw.map(b=>((w+b)*100).toFixed(1)+'%'),y:dg.map(a=>((g+a)*100).toFixed(0)+'%'),text:z.map(r=>r.map(x=>x===null?'':fmt(x,0))),texttemplate:'%{text}',zmid:price,colorscale:'RdYlGn',showscale:false,hoverongaps:false}],L({xaxis:{title:'WACC'},yaxis:{title:'growth'}}),CF);
+  const p10=q(mc,.1),p50=q(mc,.5),p90=q(mc,.9);
+  Plotly.react('c5',[{type:'histogram',x:mc,nbinsx:90,marker:{color:'#38bdf8'}}],L({shapes:[vline(price,'#fbbf24'),vline(p10,'#f87171'),vline(p50,'#34d399'),vline(p90,'#34d399')],xaxis:{title:'simulated value per share  ·  lines: 10th, median, 90th percentile, price (yellow)',gridcolor:'rgba(148,163,184,.12)'},yaxis:{title:'frequency',gridcolor:'rgba(148,163,184,.12)'},height:290}),CF);
+  const bars=[['DCF scenarios (bear to bull)',Math.min(...ks.map(k=>sc[k].ps)),Math.max(...ks.map(k=>sc[k].ps)),'#38bdf8'],['Monte Carlo (10th to 90th pct)',p10,p90,'#818cf8'],['Sensitivity grid (full range)',Math.min(...all),Math.max(...all),'#34d399']];
+  Plotly.react('c6',[{type:'bar',orientation:'h',y:bars.map(b=>b[0]),x:bars.map(b=>b[2]-b[1]),base:bars.map(b=>b[1]),marker:{color:bars.map(b=>b[3])},text:bars.map(b=>cur+fmt(b[1],0)+' to '+cur+fmt(b[2],0)),textposition:'inside',hoverinfo:'text'}],L({shapes:[vline(price,'#fbbf24')],yaxis:{autorange:'reversed'},xaxis:{title:'value per share ('+cur+')',gridcolor:'rgba(148,163,184,.12)'},height:230,margin:{l:200,r:20,t:8,b:44}}),CF);
+  window.__r={cur,fmt,B,up,wv,ig,pu,p10,p50,p90,price,g,w,t,p};
+}
+$('co').addEventListener('change',()=>{load($('co').value);schedule()});
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',schedule));
+$('share').onclick=()=>{const a=['co','price','fcf','cash','debt','sh','g','w','t','sp'].map(k=>+$(k).value);location.hash=btoa(JSON.stringify(a));navigator.clipboard?navigator.clipboard.writeText(location.href).then(()=>toast('Share link copied')):toast('Copy the address bar link')};
+$('csv').onclick=()=>{const r=window.__r;if(!r)return;const rows=[['Item','Value'],['Company',r.p.n],['Market price',r.price],['Growth %',(r.g*100).toFixed(2)],['WACC %',(r.w*100).toFixed(2)],['Terminal growth %',(r.t*100).toFixed(2)],['Intrinsic value per share',r.B.ps.toFixed(2)],['Upside/(downside) %',r.up.toFixed(1)],['Probability-weighted value',r.wv.toFixed(2)],['Market-implied growth %',r.ig===null?'n/a':(r.ig*100).toFixed(2)],['Monte Carlo P(value>price) %',r.pu.toFixed(1)],['Monte Carlo 10th pct',r.p10.toFixed(2)],['Monte Carlo 90th pct',r.p90.toFixed(2)]];const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(x=>x.join(',')).join('\n')],{type:'text/csv'}));a.download='AutoValuer_Lab.csv';a.click()};
+(function init(){let a=null;try{a=JSON.parse(atob(location.hash.slice(1)))}catch(e){}
+  load(0);if(a&&a.length===10){$('co').value=a[0];['price','fcf','cash','debt','sh','g','w','t','sp'].forEach((k,i)=>$(k).value=a[i+1])}update()})();
+</script>
+</body>
+</html>
